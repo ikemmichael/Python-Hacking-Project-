@@ -72,5 +72,5 @@ Contributions are welcome! Feel free to fork this repository and submit a pull r
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
-**Author:** [Your Name]  
-**GitHub:** [Your GitHub Profile]
+**Author:** Ikem Michael 
+**GitHub:** https://github.com/ikemmichael
